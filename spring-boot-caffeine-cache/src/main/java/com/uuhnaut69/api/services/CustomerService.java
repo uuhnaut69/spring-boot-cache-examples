@@ -2,6 +2,7 @@ package com.uuhnaut69.api.services;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,6 +18,7 @@ import javassist.NotFoundException;
  *
  */
 @Service
+@CacheConfig(cacheNames = "customer")
 public class CustomerService {
 
 	private final CustomerRepository customerRepository;
@@ -25,7 +27,7 @@ public class CustomerService {
 		this.customerRepository = customerRepository;
 	}
 
-	@Cacheable(value = "customer", key = "#id")
+	@Cacheable(key = "#id")
 	public Customer getById(int id) throws NotFoundException {
 		return customerRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found customer " + id));
 	}
@@ -34,12 +36,12 @@ public class CustomerService {
 		return customerRepository.findAll();
 	}
 
-	@CacheEvict(value = "customer")
+	@CacheEvict(key = "#id")
 	public void deleteById(int id) {
 		customerRepository.deleteById(id);
 	}
 
-	@CachePut(value = "customer", key = "#model.id")
+	@CachePut(key = "#model.id")
 	public Customer create(Customer model) {
 		Customer customer = new Customer();
 		customer.setFirstName(model.getFirstName());
